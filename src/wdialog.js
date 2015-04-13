@@ -38,9 +38,8 @@
 
 		}
 
-	function Dialog (args) {
-		
-		this.init(options);
+	function Dialog () {
+		this.init();
 	}
 
 	Dialog.prototype.init = function () {
@@ -62,151 +61,95 @@
 		// 构造弹窗内容
 		this.wrap = $('<div class="wdialog-wrap" />')
 			.appendTo(this.box);
+
 	};
 
 	/**
-	 * {
-	 *     hasCloseBtn  {Boolean}  true
-	 *     hasBg        {Boolean}  true
-	 *     width        {Number}
-	 *     height       {Number}
-	 *     html         {htmlStr}
-	 *     callback     {Object | function}
+	 * args {
+	 *     hasCloseBtn   {Boolean}
+	 *     hasBg         {Boolean}
+	 *     width         {Number}             
+	 *     height        {Number}
+	 *     html          {HtmlStr}
+	 *     events        {Object}
+	 *     closeCallback {Array | Function}
 	 * }
 	 *
 	 *
 	 */
 	Dialog.prototype.open = function (args) {
 		// Get the dialog configs
-		var options = $.extend({}, defaults, args);
+		var o = this.options = $.extend({}, defaults, args);
 
-		//  Is wdialog show gray backgorund
-		hasBg ? this.bg.show() : this.bg.hide();
+		// Set dialog width and height
+		var clentWidth  = $(window).width(),
+			clentHeight = $(window).height(),
+			left        = pageWidth / 2 - o.width / 2 - 5 + 'px',
+			top         = pageHeight / 2 - o.height / 2 - 5 + 'px';
+		
+		this.wrap.css({eft: left, top: top});
+
+		// render the dialog
+		this.wrap.html(o.html);
+
+		//  If hasBg, show gray backgorund
+		o.hasBg ? this.bg.show() : this.bg.hide();
 
 		// Is wdialog show close button
-		hasCloseBtn ? this.closeBtn.show() : this.closeBtn.hide();
+		o.hasCloseBtn ? this.closeBtn.show() : this.closeBtn.hide();
 
-		// 
+		// If hasCloseBtn, show close btn
+		this.box.show();
 		
+		// Delegate Events
+		if (o.events) {
+			this.delegateEvents(o.events);
+		}
 
 	};
 
+	Dialog.prototype.alert = function () {
+
+	};
+
+	Dialog.prototype.confirm = function () {
+
+	};
+
+	// delegate 返回什么？
+	Dialog.prototype.delegateEvents = function (events) {
+		Object.prototype.toString.call(events) === '[Object events]' ? (function() {
+				var eventSplitter = /^(\w+)\s*(.*)$/;
+				for (var key in events) {
+					var methodName = events[key],
+						method     = events[methodName],
+						match      = key.match(eventSplitter),
+						eventName  = match[1],
+						selector   = match[2];
+					this.box.delegate(selector, eventsName, method);
+				}
+			})() : throw new Error('wDialog Error: events type is error.');
+
+	};
+
+	// Close the dialog, and reset it.
 	Dialog.prototype.close = function () {
-
+		this.bg.hide();
+		this.box.hide();
+		if (this.options.callback) callback();
+		delete this.options;
 	};
 
 
+	var dialog = new Dialog();
+
+	return {
+		pluginName: pluginName,
+		pluginVersion: pluginVersion,
+		open: dialog.open,
+		close: close
+	}
 
 }));
 
 
-/*
- * author: batmanwang@myturan.com
- * date: 2013/7/15
- */
-var IGENJIN = IGENJIN || {};
-
-(function () {
-
-	//鏋勯€犲脊绐梙tml
-  	var str = "<div class='graybg'></div>" +
-  			  "<div class='dialog'>" +
-  			  "<div class='inner'>" +
-  			  "<a class='dialog-close' href='#'></a>" +
-  			  "<div class='dialog-content'>" +
-  			  "</div>" +
-  			  "</div>" +
-  			  "<div>";
-
-  	//灏嗗脊绐楁坊鍔犲埌body
-  	$(str).appendTo('body');
-	
-	//鑾峰彇寮圭獥鐨刣om瀵硅薄锛屽苟缂撳瓨
-	var	grayBg = $(".graybg"),
-		box = $(".dialog"),
-		closeBtn = $(".dialog-close"),
-		wrap = $(".dialog-content"),
-
-		dialog =  {
-
-			version: "0.2",
-
-			//寮圭獥鐨勯粯璁ら€夐」
-			options: {
-				width: 299,
-				height: 179,
-				html: '',
-				hasCloseBtn: true
-			},
-
-			showCloseBtn: function () {
-				closeBtn.css('display', 'block');
-			},
-
-			hideCloseBtn: function () {
-				closeBtn.css('display', 'none');
-			},
-
-			//鎵撳紑寮圭獥
-			open: function(args) {
-
-				var options = this.options;
-				var o = $.extend(options, args);
-
-				var pageWidth = $(window).width(),
-					pageHeight = $(window).height(),
-					left = pageWidth / 2 - o.width / 2 - 5 + 'px',
-					top = pageHeight / 2 - o.height / 2 -5 + 'px';
-
-				box.css({
-					'top': top,
-					'left': left
-				});
-
-				/*
-				wrap.css({
-					'width': o.width,
-					'height': o.height,
-				});
-				*/
-
-				o.hasCloseBtn === true ? this.showCloseBtn() : this.hideCloseBtn();
-				
-				grayBg.show();
-				wrap.html(o.html);
-				box.show();
-
-				if (o.callback) o.callback();
-
-				//delete o;
-			},
-
-			//閫氳繃寮圭獥涓婄殑鍏抽棴鎸夐挳鍏抽棴寮圭獥
-			init: (function() {
-
-				closeBtn.on('click', function() {
-					dialog.hide.apply(this);
-					return false;
-				});
-
-				box.on('click', '.cancel, .sure-close', function () {
-					dialog.hide.apply(this);
-					return false;
-				});
-
-				/*box.on('click', '.cancel, .sure-close', function () {
-					dialog.hide.apply(this);
-					return false;
-				});*/
-				
-			})(),
-
-			//鍏抽棴寮圭獥
-			hide: function() {
-				grayBg.hide();
-				box.hide();
-			}
-		};
-
-	return IGENJIN.dialog = dialog;
-})();
