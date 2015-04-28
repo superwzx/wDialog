@@ -93,10 +93,12 @@
 		this.wrap.html(o.html);
 
 		//  If hasBg, show gray backgorund
+
 		o.hasBg ? this.bg.show() : this.bg.hide();
 
 		// Is wdialog show close button
-		o.hasCloseBtn ? this.closeBtn.show() : this.closeBtn.hide();
+		this.setXBtn(o.hasXBtn);
+		o.hasXBtn ? this.XBtn.show() : this.XBtn.hide();
 
 		// If hasCloseBtn, show close btn
 		this.box.show();
@@ -106,6 +108,16 @@
 			this.delegateEvents(o.events);
 		}
 
+	};
+
+	/**
+	 * set xbtn show or hide
+	 *************************
+	 * args:
+	 * hasXBtn    {Boolean}    ture | false
+	 */
+	Dialog.prototype.setXBtn = function (hasXBtn) {
+		hasXBtn ? this.XBtn.show() : this.XBtn.hide();
 	};
 
 	Dialog.prototype.alert = function () {
