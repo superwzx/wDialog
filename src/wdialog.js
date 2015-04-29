@@ -7,19 +7,21 @@
 // see https://github.com/umdjs/umd/blob/master/returnExports.js
 (function (root, factory) {
 	'use strict';
+
 	/*global define, exports, module */
 	if (typeof define === 'function' && define.amd) {
-	// AMD. Register as an anonymous module.
-	define(factory);
+		// AMD. Register as an anonymous module.
+		define(factory);
 	} else if (typeof exports === 'object') {
-	// Node. Does not work with strict CommonJS, but
-	// only CommonJS-like enviroments that support module.exports,
-	// like Node.
-	module.exports = factory();
+		// Node. Does not work with strict CommonJS, but
+		// only CommonJS-like enviroments that support module.exports,
+		// like Node.
+		module.exports = factory();
 	} else {
-	// Browser globals (root is window)
-	root.returnExports = factory();
+		// Browser globals (root is window)
+		root.returnExports = factory();
 	}
+
 }(this, function () {
 
 	var pluginName = "wDialog",
@@ -82,15 +84,7 @@
 		var o = this.options = $.extend({}, defaults, args);
 
 		// Set dialog width and height
-		var clentWidth  = $(window).width(),
-			clentHeight = $(window).height(),
-			left        = pageWidth / 2 - o.width / 2 - 5 + 'px',
-			top         = pageHeight / 2 - o.height / 2 - 5 + 'px';
-		
-		this.wrap.css({eft: left, top: top});
-
-		// render the dialog
-		this.wrap.html(o.html);
+		this.setShape(o.width, o.height, o.tpl)
 
 		//  If hasBg, show gray backgorund
 		this.setBg(o.hasBg);
@@ -113,18 +107,52 @@
 
 	/**
 	 * set dialog width & height
-	 *
-	 *
+	 ****************************
+	 * args:
+	 *     width     {Number}
+	 *     height    {Number}
+	 *     tpl       {String}
+	 ****************************
+	 * return:
+	 *     this
 	 */
+	Dialog.prototype.setShape = function (width, height) {
+		var vp       = $(window),
+			vpWidth  = vp.width(),
+			vpHeight = vp.height(),
+			left     = 50% - width / 2 + 'px',
+			top      = 50% - height / 2 + 'px';
+
+		this.box.css({
+			position: 'absolute',
+			left: left,
+			top: top
+
+		});
+		
+		return this;
+	};
+
+
+	
+	Dialog.prototype.setContent = function (tpl) {
+		this.wrap.html(tpl);
+		return this;
+	}
+
 
 	/**
 	 * set dialog-bg show or hide
 	 ******************************
 	 * args:
-	 * hasBg    {Boolean}    ture | false
+	 *     hasBg    {Boolean}    ture | false
+	 ******************************
+	 * return:
+	 *     this
 	 */
 	Dialog.prototype.setBg = function (hasBg) {
 		hasXBg ? this.bg.show() : this.bg.hide();
+		return this;
 	};
 
 
@@ -133,9 +161,13 @@
 	 *************************
 	 * args:
 	 * hasXBtn    {Boolean}    ture | false
+	 *************************
+	 * return:
+	 *     this
 	 */
 	Dialog.prototype.setXBtn = function (hasXBtn) {
 		hasXBtn ? this.XBtn.show() : this.XBtn.hide();
+		return this;
 	};
 
 
@@ -144,11 +176,15 @@
 	 *************************
 	 * args:
 	 * isDraggable    {Boolean}    ture | false
+	 *************************
+	 * return:
+	 *     this
 	 */
 	Dialog.prototype.setDraggable = function (isDraggable) {
 		isDraggable ? (function () {
 
-		})() : return;
+		})() : void;
+		return this;
 	};
 
 
@@ -157,6 +193,9 @@
 	 *************************
 	 * args:
 	 * isScrollable    {Boolean}    ture | false
+	 *************************
+	 * return:
+	 *     this
 	 */
 	Dialog.prototype.setScrollable = function (isScrollable) {
 		isScrollable ? (function () {
@@ -164,6 +203,7 @@
 		})() : (function () {
 
 		})();
+		return this;
 	};
 
 
@@ -175,7 +215,7 @@
 	 */
 	Dialog.prototype.resize = function () {
 		$(window).on('resize', function () {
-
+			this.setShape();
 		})
 	};
 
@@ -221,7 +261,9 @@
 	Dialog.prototype.close = function () {
 		this.bg.hide();
 		this.box.hide();
-		if (this.options.callback) callback();
+		if (this.options.closeCallback) {
+			this.options.closeCallback();
+		}
 		delete this.options;
 	};
 

@@ -20,5 +20,8 @@
   "bugs": {
     "url": "https://github.com/superwzx/wDialog/issues"
   },
-  "homepage": "https://github.com/superwzx/wDialog"
+  "homepage": "https://github.com/superwzx/wDialog",
+  "devDependencies": {
+    "chai": "^2.3.0"
+  }
 }
