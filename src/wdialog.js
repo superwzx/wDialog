@@ -106,7 +106,16 @@
 			this.delegateEvents(o.events);
 		}
 
+		// listenTo window resize event
+		this.resize();
+
 	};
+
+	/**
+	 * set dialog width & height
+	 *
+	 *
+	 */
 
 	/**
 	 * set dialog-bg show or hide
@@ -118,7 +127,6 @@
 		hasXBg ? this.bg.show() : this.bg.hide();
 	};
 
-	// Dialog.prototype.set
 
 	/**
 	 * set xbtn show or hide
@@ -130,12 +138,26 @@
 		hasXBtn ? this.XBtn.show() : this.XBtn.hide();
 	};
 
-	Dialog.prototype.setDroppable = function (isDroppable) {
-		isDroppable ? (function () {
+
+	/**
+	 * set dialog draggable
+	 *************************
+	 * args:
+	 * isDraggable    {Boolean}    ture | false
+	 */
+	Dialog.prototype.setDraggable = function (isDraggable) {
+		isDraggable ? (function () {
 
 		})() : return;
 	};
 
+
+	/**
+	 * set dialog scrollable
+	 *************************
+	 * args:
+	 * isScrollable    {Boolean}    ture | false
+	 */
 	Dialog.prototype.setScrollable = function (isScrollable) {
 		isScrollable ? (function () {
 
@@ -145,15 +167,36 @@
 	};
 
 
-
+	/**
+	 * When window has changed,
+	 * resize the dialog.
+	 *************************
+	 * 
+	 */
 	Dialog.prototype.resize = function () {
+		$(window).on('resize', function () {
 
+		})
 	};
 
+
+	/**
+	 * set dialog scrollable
+	 *************************
+	 * args:
+	 * isScrollable    {Boolean}    ture | false
+	 */
 	Dialog.prototype.alert = function () {
 
 	};
 
+
+	/**
+	 * set dialog scrollable
+	 *************************
+	 * args:
+	 * isScrollable    {Boolean}    ture | false
+	 */
 	Dialog.prototype.confirm = function () {
 
 	};
