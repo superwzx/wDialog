@@ -27,18 +27,14 @@
 	var pluginName = "wDialog",
 		pluginVersion = '0.0.3',
 		defaults = {
-			width:,
-			height:,
-			html:,
-			hasCloseBtn: true,
-			callback: function () { }	
+			width: 300,
+			height: 400,
+			tpl: null,
+			hasBg: true,
+			hasXBtn: true,
+			isDraggable: true,
+			closeCallback: null	
 		};
-
-		dialog = {
-			version: '0.0.3',
-			init: 
-
-		}
 
 	function Dialog () {
 		this.init();
@@ -81,24 +77,30 @@
 	 */
 	Dialog.prototype.open = function (args) {
 		// Get the dialog configs
-		var o = this.options = $.extend({}, defaults, args);
+		var o = this.o = $.extend({}, defaults, args);
+		this.box.width = o.width;
+		this.box.height = o.height;
 
 		// Set dialog width and height
-		this.setShape(o.width, o.height, o.tpl)
+		this.setShape();
 
 		//  If hasBg, show gray backgorund
-		this.setBg(o.hasBg);
+		this.setBg();
+
+		this.setContent();
 
 		// Is wdialog show close button
-		this.setXBtn(o.hasXBtn);
+		// this.setXBtn(o.hasXBtn);
+
+		this.setDraggable();
 
 		// If hasCloseBtn, show close btn
 		this.box.show();
 		
 		// Delegate Events
-		if (o.events) {
-			this.delegateEvents(o.events);
-		}
+		// if (o.events) {
+		this.delegateEvents();
+		// }
 
 		// listenTo window resize event
 		this.resize();
@@ -116,27 +118,32 @@
 	 * return:
 	 *     this
 	 */
-	Dialog.prototype.setShape = function (width, height) {
-		var vp       = $(window),
-			vpWidth  = vp.width(),
-			vpHeight = vp.height(),
-			left     = 50% - width / 2 + 'px',
-			top      = 50% - height / 2 + 'px';
+	Dialog.prototype.setShape = function () {
+
+		var vpWidth  = $(window).width(),
+			vpHeight = $(window).height(),
+			width = this.box.width,
+			height = this.box.height,
+			left     = vpWidth / 2 - width / 2 + 'px',
+			top      = vpHeight /2 - height / 2 + 'px';
 
 		this.box.css({
-			position: 'absolute',
+			width: width,
+			height: height,
 			left: left,
 			top: top
-
-		});
+		}).show();
 		
 		return this;
 	};
 
 
-	
-	Dialog.prototype.setContent = function (tpl) {
-		this.wrap.html(tpl);
+
+	Dialog.prototype.setContent = function () {
+		if (this.o.tpl) {
+			this.wrap.html(this.o.tpl);
+		}
+			
 		return this;
 	}
 
@@ -150,8 +157,8 @@
 	 * return:
 	 *     this
 	 */
-	Dialog.prototype.setBg = function (hasBg) {
-		hasXBg ? this.bg.show() : this.bg.hide();
+	Dialog.prototype.setBg = function () {
+		this.o.hasBg ? this.bg.show() : this.bg.hide();
 		return this;
 	};
 
@@ -165,8 +172,8 @@
 	 * return:
 	 *     this
 	 */
-	Dialog.prototype.setXBtn = function (hasXBtn) {
-		hasXBtn ? this.XBtn.show() : this.XBtn.hide();
+	Dialog.prototype.setXBtn = function () {
+		this.o.hasXBtn ? this.XBtn.show() : this.XBtn.hide();
 		return this;
 	};
 
@@ -180,10 +187,44 @@
 	 * return:
 	 *     this
 	 */
-	Dialog.prototype.setDraggable = function (isDraggable) {
-		isDraggable ? (function () {
+	Dialog.prototype.setDraggable = function () {
 
-		})() : void;
+		if (this.o.isDraggable) {
+
+			var bMouseUp = true,
+				nMouseX,
+				nMouseY,
+				nStartX,
+				nStartY;
+
+			// this.box.on('mousedown', function (e) {})
+
+			this.box.on({
+				mousedown: function (e) {
+					target = e.target; 
+					bMouseUp = false;
+					nStartX = nStartY = 0;
+					nStartX += target.offsetLeft;
+					nStartY += target.offsetTop;
+					nMouseX = e.clientX;
+					nMouseY = e.clientY;
+					return false;
+				},
+				mousemove: function (e) {
+					if (bMouseUp) return;
+					e.target.style.left = nStartX + e.clientX - nMouseX + 'px';
+					e.target.style.top = nStartY + e.clientY - nMouseY + 'px';
+				},
+				mouseup: function (e) {
+					bMouseUp = true;
+				}
+			});
+
+			$(document).on('mouseup', function (e) {
+				bMouseUp = true;
+			})
+
+		}
 		return this;
 	};
 
@@ -197,8 +238,8 @@
 	 * return:
 	 *     this
 	 */
-	Dialog.prototype.setScrollable = function (isScrollable) {
-		isScrollable ? (function () {
+	Dialog.prototype.setScrollable = function () {
+		this.o.isScrollable ? (function () {
 
 		})() : (function () {
 
@@ -211,12 +252,14 @@
 	 * When window has changed,
 	 * resize the dialog.
 	 *************************
-	 * 
+	 * return:
+	 *      this
 	 */
 	Dialog.prototype.resize = function () {
-		$(window).on('resize', function () {
+		$(window).on('resize', $.proxy(function () {
 			this.setShape();
-		})
+		}, this));
+		return this;
 	};
 
 
@@ -241,20 +284,22 @@
 
 	};
 
-	// delegate 返回什么？
-	Dialog.prototype.delegateEvents = function (events) {
-		Object.prototype.toString.call(events) === '[Object events]' ? (function() {
-				var eventSplitter = /^(\w+)\s*(.*)$/;
-				for (var key in events) {
-					var methodName = events[key],
-						method     = events[methodName],
-						match      = key.match(eventSplitter),
-						eventName  = match[1],
-						selector   = match[2];
-					this.box.delegate(selector, eventsName, method);
-				}
-			})() : throw new Error('wDialog Error: events type is error.');
-
+	// delegate 
+	Dialog.prototype.delegateEvents = function () {
+		var events = this.o.events;
+		if (events && Object.prototype.toString.call(events) === '[object Object]') {
+			// var eventSplitter = /^(\w+)\s*(.*)$/;
+			var eventSplitter = /(.*)\s(\w+)/;
+			for (var key in events) {
+				var methodName = key;
+					method     = events[methodName],
+					match      = key.match(eventSplitter),
+					selector   = match[1],
+					eventName  = match[2];
+				this.box.delegate(selector, eventName, method);
+			}
+		}
+		return this;
 	};
 
 	// Close the dialog, and reset it.
@@ -268,13 +313,13 @@
 	};
 
 
-	var dialog = new Dialog();
+	return dialog = new Dialog();
 
-	return {
+	return s = {
 		pluginName: pluginName,
 		pluginVersion: pluginVersion,
 		open: dialog.open,
-		close: close
+		close: dialog.close
 	}
 
 }));

@@ -1,0 +1,22 @@
+{
+  "name": "wDialog",
+  "version": "0.0.1",
+  "homepage": "https://github.com/superwzx/wDialog",
+  "authors": [
+    "superwzx <wzx175@gmail.com>"
+  ],
+  "moduleType": [
+    "amd"
+  ],
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "jquery": "1.9.1"
+  }
+}

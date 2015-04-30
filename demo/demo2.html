@@ -1,0 +1,128 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="UTF-8" />
+<title>Draggable objects</title>
+
+<style type="text/css">
+.draggable {
+	position: fixed;
+	left: 0;
+	top: 0;
+	width: auto;
+	height: auto;
+	cursor: move;
+}
+
+#mydiv {
+	width: 300px;
+	height: 200px;
+	left: 200px;
+	top: 200px;
+	background-color: #00ff00;
+}
+</style>
+</head>
+
+<body onload="init()">
+
+<div class="draggable" id="mydiv"><p>一个 Hello world!</p></div>
+<div class="draggable" style="background-color:#aaaaaa;">又一个 hello world!</div>
+
+
+<script type="text/javascript">
+
+function init () {
+
+	var bMouseUp = true,
+		oDragging,
+		nMouseX,
+		nMouseY,
+		nStartX,
+		nStartY,
+		nZFocus = 100; // the highest z-Index present in your page plus 1 
+
+	function dragDown(e) {
+
+		var that = e.target || e.srcElement;
+		console.log(that)
+
+		var bExit = true;
+
+		if (that.className === "draggable") {
+			bExit = false;
+			oDragging = that;
+		}
+
+		if (bExit) { return; }
+
+		bMouseUp = false;
+		nStartX = nStartY = 0;
+
+		nStartX += that.offsetLeft;
+		nStartY += that.offsetTop;
+
+		console.log(e.clientX);
+		nMouseX = e.clientX;
+		nMouseY = e.clientY;
+		oDragging.style.zIndex = nZFocus++;
+		return false;
+	}
+
+
+	function dragMove(e) {
+		if (bMouseUp) { return; }
+		oDragging.style.left = nStartX + e.clientX - nMouseX + "px";
+		oDragging.style.top = nStartY + e.clientY - nMouseY + "px";
+	}
+
+	function dragUp() {
+		bMouseUp = true;
+	}
+
+	var mydiv = document.getElementById('mydiv');
+
+	if (window.addEventListener) {
+
+		mydiv.addEventListener('mousedown', function (e) {
+
+			dragDown(e);
+		}, false);
+
+		mydiv.addEventListener('mousemove', function (e) {
+			dragMove(e);
+		}, false);
+
+		mydiv.addEventListener('mouseup', function (e) {
+			dragUp(e);
+		}, false);
+
+		document.addEventListener('mouseup', function (e) {
+			dragUp(e);
+		}, false)
+
+	} else if (window.attachEvent) {
+
+		mydiv.attachEvent('onmousedown', function (e) {
+			dragDown(e)
+		});
+		mydiv.attachEvent('onmousemove', function (e) {
+			dragMove(window.event)
+		})
+		mydiv.attachEvent('onmouseup', function (e) {
+			dragUp(window.event)
+		})
+		document.attachEvent('onmouseup', function (e) {
+			dragUp(e);
+		})
+
+	} else {
+		mydiv.onmousedown = dragDown();
+		mydiv.onmousemove = dragMove();
+		mydiv.onmouseup = dragUp();
+	}
+};
+
+</script>
+</body>
+</html>
