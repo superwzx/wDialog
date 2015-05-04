@@ -25,19 +25,23 @@
 	</style>
 </head>
 <body>
-
+	<a id="open-dialog-1" href="#">点击</a>
 	<script type="text/javascript" src="../lib/jquery.min.js"></script>
 	<script type="text/javascript" src="../src/wdialog.js"></script>
 	<script type="text/javascript">
 	$(document).ready(function () {
-		dialog.open({
-			tpl: '<p class="haha">hehe</p>',
-			events: {
-				'.haha click': function () {
-					console.log("hehe")
+
+		$('#open-dialog-1').on('click', function (e) {
+			dialog.open({
+				tpl: '<p class="haha">hehe</p>',
+				events: {
+					'.haha click': function () {
+						console.log("hehe")
+					}
 				}
-			}
-		});
+			});
+			e.preventDefault();
+		})
 	})
 	</script>
 </body>

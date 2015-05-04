@@ -60,6 +60,8 @@
 		this.wrap = $('<div class="wdialog-wrap" />')
 			.appendTo(this.box);
 
+		this.isOpened = false;
+
 	};
 
 	/**
@@ -76,10 +78,12 @@
 	 *
 	 */
 	Dialog.prototype.open = function (args) {
+
+		if (this.isOpened) {
+			return false;
+		}
 		// Get the dialog configs
 		var o = this.o = $.extend({}, defaults, args);
-		this.box.width = o.width;
-		this.box.height = o.height;
 
 		// Set dialog width and height
 		this.setShape();
@@ -105,6 +109,8 @@
 		// listenTo window resize event
 		this.resize();
 
+		this.isOpened = true;
+
 	};
 
 	/**
@@ -122,8 +128,8 @@
 
 		var vpWidth  = $(window).width(),
 			vpHeight = $(window).height(),
-			width = this.box.width,
-			height = this.box.height,
+			width    = this.o.width,
+			height   = this.o.height,
 			left     = vpWidth / 2 - width / 2 + 'px',
 			top      = vpHeight /2 - height / 2 + 'px';
 
@@ -310,6 +316,7 @@
 			this.options.closeCallback();
 		}
 		delete this.options;
+		this.isOpened = false;
 	};
 
 
