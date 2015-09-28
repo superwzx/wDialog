@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+;<!DOCTYPE html>
 <html>
 <head>
 	<meta charset="utf-8">
@@ -7,22 +7,8 @@
 	<link rel="stylesheet" href="">
 	<style>
 		* {margin: 0; padding: 0;}
-
-		.wdialog-bg {
-			width: 100%;
-			height: 100%;
-			position: fixed;
-			background: rgba(33, 33, 33, .5);
-			z-index: 998;
-		}
-		.wdialog {
-			position: fixed;
-			background: #fff;
-			border: 1px solid red;
-			z-index: 999;
-		}
-
 	</style>
+	<link rel="stylesheet" href="../src/styles/wdialog.css">
 </head>
 <body>
 	<a id="open-dialog-1" href="#">点击</a>
@@ -31,18 +17,85 @@
 	<script type="text/javascript">
 	$(document).ready(function () {
 
+		var str = '<select><option>1</option><option>2</option><option>3</option></select>';
+
+
+
+		// return;
+
 		$('#open-dialog-1').on('click', function (e) {
-			dialog.open({
-				tpl: '<p class="haha">hehe</p>',
-				events: {
-					'.haha click': function () {
-						console.log("hehe")
+
+			fetch('//offline-news-api.herokuapp.com/stories')
+  .then(function(response) {
+    return response.text()
+  }).then(function(body) {
+    document.body.innerHTML = body
+  });
+
+  return;
+
+			var dialog = Dialog.create({
+				width: 400,
+				hasMask: true,
+				hasXBtn: true,
+				init: function () {	},
+				onCallback: function () { },
+				offCallback: function () { },
+				layers: [{
+					
+					title: "重要提醒",
+					bodyView: str,
+					buttons: [
+						{
+							id: 'abc',
+							className: 'btn-default',
+							value: '取消'
+						},
+						{
+							id: 'cba',
+							className: 'btn-primary',
+							value: '确定'
+						}
+					],
+					events: {
+						'#cba click': function () {
+							dialog.setbody()
+						},
+						'#abc click': function () {
+							console.log(this)
+						}
 					}
-				}
+				}, {
+
+					title: "提醒",
+					bodyView: str,
+					buttons: [
+						{
+							id: 'abc',
+							className: 'btn-default',
+							value: '取消'
+						},
+						{
+							id: 'cba',
+							className: 'btn-primary',
+							value: '再次确认'
+						}
+					],
+					events: {
+						'#cba click': function () {
+							dialog.setbody()
+						},
+						'#abc click': function () {
+							console.log(this)
+						}
+					}
+				}]
 			});
+
 			e.preventDefault();
-		})
-	})
+		});
+
+	});
 	</script>
 </body>
 </html>

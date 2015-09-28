@@ -1,0 +1,80 @@
+;<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<title>wdialog dmeo</title>
+	<link rel="stylesheet" href="">
+	<style>
+		* {margin: 0; padding: 0;}
+	</style>
+	<link rel="stylesheet" href="../src/styles/wdialog.css">
+</head>
+<body>
+	<a id="open-dialog-1" href="#">点击</a>
+	<script type="text/javascript" src="../lib/jquery.min.js"></script>
+	<script type="text/javascript" src="../src/wdialog.js"></script>
+	<script type="text/javascript">
+	$(document).ready(function () {
+
+		$('#open-dialog-1').click(function () {
+
+
+		var dialog = Dialog.create({
+                title: "场馆等级修改",
+                width: 700,
+                bodyView: "提示",
+                buttons: [{
+                        id: 'a_edit_submit',
+                        className: 'btn-primary',
+                        value: '提交修改'
+                    }, {
+                        id: 'a_edit_cancel',
+                        className: 'btn-default',
+                        value: '取消'
+                    }],
+                events: {
+                	'#a_edit_submit click': function () {
+
+                        // config.title
+                        // config.msg
+                        // config.delay
+                        // config.closeCallback
+						Dialog.alert({title: "注意", msg: "hahahah"});
+
+                    },
+                    '#a_edit_cancel click': function () {
+
+                        // title
+                        // msg
+                        // ----------------
+                        // yes -> `function`
+                        // no  -> `function`
+                        // ----------------
+                        // yes {text: '确定', handle: function () {}}
+                        // no  {text: '取消', handle: function () {}}
+                        var haha = Dialog.confirm({
+                        	msg: "123123123",
+                        	yes: function () {
+                                haha.close();
+                            },
+                    		no: function () {
+                                haha.close();
+                                dialog.close();
+                            }
+                        });
+
+                    }
+                }
+            });
+
+            // console.log(dialog)
+		});
+
+
+	});
+	</script>
+</body>
+</html>
+
+

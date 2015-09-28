@@ -26,138 +26,47 @@
 
 	var	defaults = {
 			width: 400,
-			top: '10%',
 			bodyView: null,
 			hasMask: true,
 			hasXBtn: true,
 			draggable: false,
 			init: null,
 			closeCallback: null
-		},
-		Dialog = {};
+		};
 
-	function Modal (configs) {
-		Modal.occupied = true;
+	function Dialog (configs) {
+		Dialog.occupied = true;
 		this.o = $.extend({}, defaults, configs);
-		this.setMask();
-		$.when(this.deferred())
-			.then(this.open());
-		// if (this.o.deferred) {
-		// 	this.open();
-		// }
-		// $
-		// this.open();
-	}
-
-	// config.title
-	// config.msg
-	// config.delay
-	// config.closeCallback
-	Dialog.alert = function (config) {
-		var o = config || {};
-		var dialog = new Modal({
-			title: o.title,
-			top: '20%',
-			bodyView: o.msg,
-			closeCallback: o.closeCallback
-		});
-		if ( o.delay && (+o.delay > 0) ) {
-			setTimeout(function () {
-				dialog.close();
-			}, o.delay);
-		}
-	}
-
-	//
-	Dialog.confirm = function (config) {
-		var o = config || {},
-			yesHandle,
-			noHandle;
-
-		if (Object.prototype.toString.call(o['yes']) === '[object Object]'
-			&& Object.prototype.toString.call(o['yes']) === '[object Object]') {
-
-			if (typeof o.yes.handle == 'function') {
-				yesHandle = o.yes.handle;
-				noHandle = o.no.handle;
-			} else {
-				throw new Error('wDialog confirm handle is a `function`!');
-			}
-
-		} else if (Object.prototype.toString.call(o['yes']) === '[object Function]'
-			&& Object.prototype.toString.call(o['no']) === '[object Function]') {
-			yesHandle =  o.yes;
-			noHandle =  o.no;
-
-		} else {
-			throw new Error('wDialog confirm handle is a `function`!');
-		}
-
-		var yesText = (typeof o.yes.text === 'string') ? o.yes.text : '确 定';
-
-		var noText = (typeof o.no.text === 'string') ? o.no.text : '取 消';
-
-		// title
-		// msg
-		// ----------------
-		// yes -> `function`
-		// no  -> `function`
-		// ----
-		// yes {text: '确定', handle: function () {}}
-		// no  {text: '取消', handle: function () {}}
-		// ----------------
-		var dialog = new Modal({
-			title: o.title,
-			top: '20%',
-			bodyView: o.msg,
-			buttons: [
-				{
-                    id: 'wdialog-confirm-yes',
-                    className: 'btn-primary',
-                    value: yesText
-                },
-                {
-                    id: 'wdialog-confirm-no',
-                    className: 'btn-default',
-                    value: noText
-                }
-			],
-			events: {
-            	'#wdialog-confirm-yes click': function () {
-            		yesHandle();
-            	},
-                '#wdialog-confirm-no click': function () {
-                	noHandle();
-                }
-            },
-			closeCallback: o.closeCallback
-		});
-		return dialog;
+		this.open();
 	}
 
 	Dialog.create = function (configs) {
-		if (Modal.occupied) {
+		if (Dialog.occupied) {
 			return;
 		}
 
-		return new Modal(configs);
+		return new Dialog(configs);
 	}
 
-	Dialog.version = "0.1.1";
+	Dialog.version = "0.0.6";
 
-	Modal.occupied = false;
+	Dialog.occupied = false;
 
 
-	Modal.prototype.open = function () {
+	Dialog.prototype.open = function () {
 
 		// 构造弹窗遮罩层
-		// this.setMask();
+		if (this.o.hasMask) {
+			this.setMask();
+		}
 
 		// 构造弹窗主体
 		this.setBox();
 
 		// 构造弹窗关闭按钮
-		this.setXBtn();
+		if (this.o.hasXBtn) {
+			this.setXBtn();
+		}
 
 		// 构造弹窗Header
 		this.setHeader();
@@ -170,15 +79,17 @@
 
 		// 设置弹窗宽高；定位弹窗
 		this.setShape();
+
+		// 初始化
+		this.initialize();
 		
 		// 委派弹窗事件
 		this.delegateEvents();
 
 		// 弹窗是否可拖拽
-		this.setDraggable();
-
-		// 初始化
-		this.initialize();
+		if (this.o.draggable) {
+			this.setDraggable();
+		}
 
 		// 显示弹窗
 		this.box.show();
@@ -191,10 +102,10 @@
 	/**
 	 * 弹窗初始化
 	 */
-	Modal.prototype.initialize = function () {
+	Dialog.prototype.initialize = function () {
 		var init = this.o.init;
 		if (init && typeof init === 'function') {
-			this.o.init.apply(this);
+			this.o.init();
 		}
 	};
 
@@ -202,32 +113,19 @@
 	/**
 	 * Set the Dialog Mask
 	 */
-	Modal.prototype.setMask = function () {
+	Dialog.prototype.setMask = function () {
 		// Create the Mask
 		this.mask = $('<div class="wdialog-bg" />').appendTo('body');
 		return this;
 	};
 
 	/**
-	 * Set the Dialog Mask
-	 */
-	Modal.prototype.deferred = function () {
-		// Create the Mask
-		if (this.o.deferred && ({}).toString(this.o.deferred) === '[object Object]') {
-			
-		}
-		
-	};
-
-	/**
 	 * Set the Dialog Box
 	 */
-	Modal.prototype.setBox = function () {
+	Dialog.prototype.setBox = function () {
 		// Create the box
-		// this.boxWrap = $('<div class="wdialog-wrap" />').appendTo('body');
-		this.box = $('<div class="wdialog" />')
-			.css('top', this.o.top)
-			.appendTo(this.mask);
+		this.boxWrap = $('<div class="wdialog-wrap" />').appendTo('body');
+		this.box = $('<div class="wdialog" />').appendTo(this.boxWrap);
 		this.container = $('<div class="wdialog-container" />').appendTo(this.box);
 		return this;
 	};
@@ -236,8 +134,7 @@
 	/**
 	 * Set the Dialog Close-button
 	 */
-	Modal.prototype.setXBtn = function () {
-		if (!this.o.hasXBtn) return;
+	Dialog.prototype.setXBtn = function () {
 		// Create the Close-button
 		this.XBtn = $('<a class="wdialog-xbtn">×</a>')
 			.click($.proxy(function () {
@@ -251,7 +148,7 @@
 	/**
 	 * Set the Dialog Header
 	 */
-	Modal.prototype.setHeader = function () {
+	Dialog.prototype.setHeader = function () {
 		// Create the Dialog Header
 		this.containerHeader = $('<div class="wdialog-container-header" />');
 
@@ -274,7 +171,7 @@
 	/**
 	 * Set the Dialog Body-View
 	 */
-	Modal.prototype.setBody = function () {
+	Dialog.prototype.setBody = function () {
 		// Create the Dialog Body
 		this.containerBody = $('<div class="wdialog-container-body" />')
 			.appendTo(this.container);
@@ -297,26 +194,21 @@
 	/**
 	 * Set the Dialog Footer
 	 */
-	Modal.prototype.setFooter = function () {
+	Dialog.prototype.setFooter = function () {
 		// Set the Footer Button
 		var buttons = this.o.buttons;
 		if (buttons && Object.prototype.toString.call(buttons) === '[object Array]') {
 			// Create the Dialog setFooter
 			this.containerFooter = $('<div class="wdialog-container-footer" />');
-			var l = buttons.length;
-			for (var i = 0; i < l; i++) {
+			for (var i = 0, l = buttons.length; i < l; i++) {
 				var button = buttons[i],
 					attributes = {},
 					value;
 				if (button.id) {
-					attributes['id'] = button.id;
+					attributes.id = button.id;
 				}
-
 				if (button.className) {
-					// @TODO clsss 与 className
-					// obj.class为什么会报错？
-					// $.fn.attr('class or className')
-					attributes['class'] = button.className;
+					attributes.className = button.className;
 				}
 				if (button.value && typeof button.value === 'string') {
 					value = button.value;
@@ -339,19 +231,16 @@
 
 
 	// Close the dialog, and reset it.
-	Modal.prototype.close = function () {
-
-		if (this.o.closeCallback) {
-			this.o.closeCallback.apply(this);
-		}
-
+	Dialog.prototype.close = function () {
 		if (this.o.hasMask) {
 			this.mask.remove();	
 		}
-		
-		// this.boxWrap.remove();
-		
-		Modal.occupied = false;
+		this.boxWrap.remove();
+		if (this.o.closeCallback) {
+			this.o.closeCallback();
+		}
+		delete this;
+		Dialog.occupied = false;
 	};
 
 
@@ -366,12 +255,22 @@
 	 * return:
 	 *     this
 	 */
-	Modal.prototype.setShape = function () {
+	Dialog.prototype.setShape = function () {
+
+		var vpWidth  = $(window).width(),
+			vpHeight = $(window).height(),
+			width    = this.o.width,
+			height   = this.box.height();
+			// left     = vpWidth / 2 - width / 2 + 'px',
+			// top      = vpHeight /2 - height / 2 + 'px';
 
 		this.box.css({
-			width: this.o.width
-		});
-
+			width: width,
+			// height: height,
+			// left: left,
+			// top: '20%'
+		})//.show();
+		
 		return this;
 	};
 
@@ -385,8 +284,8 @@
 	 * return:
 	 *     this
 	 */
-	Modal.prototype.setDraggable = function () {
-		if (!this.o.draggable) return;
+	Dialog.prototype.setDraggable = function () {
+
 		var bMouseUp = true,
 			nMouseX,
 			nMouseY,
@@ -431,7 +330,7 @@
 	 * return:
 	 *     this
 	 */
-	Modal.prototype.setScrollable = function () {
+	Dialog.prototype.setScrollable = function () {
 		this.o.isScrollable ? (function () {
 
 		})() : (function () {
@@ -450,7 +349,7 @@
 	 *     -- flag   {String}  "right | error | normal",
 	 *     -- delay  {Number}  1000   
 	 */
-	Modal.prototype.showTooltip = function (config) {
+	Dialog.prototype.showTooltip = function (config) {
 
 		var msg   = config.msg,
 			flag  = config.flag,
@@ -486,7 +385,7 @@
 	 * Set the tooltip off the Dialog Message
 	 *
 	 */
-	Modal.prototype.offTooltip = function () {
+	Dialog.prototype.offTooltip = function () {
 		this.tooltipMsg.remove();
 		return this;
 	};
@@ -499,7 +398,7 @@
 	 * return:
 	 *      this
 	 */
-	Modal.prototype.resize = function () {
+	Dialog.prototype.resize = function () {
 		$(window).on('resize', $.proxy(function () {
 			this.setShape();
 		}, this));
@@ -508,7 +407,7 @@
 
 
 	// delegate 
-	Modal.prototype.delegateEvents = function () {
+	Dialog.prototype.delegateEvents = function () {
 		var events = this.o.events;
 		if (events && Object.prototype.toString.call(events) === '[object Object]') {
 			var eventSplitter = /(.*)\s(\w+)/;
@@ -526,4 +425,5 @@
 
 	return Dialog;
 }));
+
 

@@ -1,2 +1,2 @@
 # wDialog
-wDialog is a jQuery Modal Dialog plugin.
+wDialog is a jquery dialog plugin.
