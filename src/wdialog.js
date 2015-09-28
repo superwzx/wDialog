@@ -32,7 +32,7 @@
 			tpl: null,
 			hasBg: true,
 			hasXBtn: true,
-			isDraggable: true,
+			// isDraggable: true,
 			closeCallback: null	
 		};
 
