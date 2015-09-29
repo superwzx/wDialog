@@ -32,6 +32,7 @@
 			hasXBtn: true,
 			draggable: false,
 			init: null,
+			deferred: null,
 			closeCallback: null
 		},
 		Dialog = {};
@@ -39,14 +40,15 @@
 	function Modal (configs) {
 		Modal.occupied = true;
 		this.o = $.extend({}, defaults, configs);
+		// 构造弹窗遮罩层
 		this.setMask();
-		$.when(this.deferred())
-			.then(this.open());
-		// if (this.o.deferred) {
-		// 	this.open();
-		// }
-		// $
-		// this.open();
+		if (this.o.deferred) {
+			$.when(this.setWait()).then(function (res) {
+				
+				// this.
+			});
+		}
+		
 	}
 
 	// config.title
@@ -149,43 +151,28 @@
 
 
 	Modal.prototype.open = function () {
-
-		// 构造弹窗遮罩层
-		// this.setMask();
-
 		// 构造弹窗主体
 		this.setBox();
-
 		// 构造弹窗关闭按钮
 		this.setXBtn();
-
 		// 构造弹窗Header
 		this.setHeader();
-
 		// 构造弹窗Body
 		this.setBody();
-
 		// 构造弹窗Footer
 		this.setFooter();
-
 		// 设置弹窗宽高；定位弹窗
 		this.setShape();
-		
 		// 委派弹窗事件
 		this.delegateEvents();
-
 		// 弹窗是否可拖拽
 		this.setDraggable();
-
 		// 初始化
 		this.initialize();
-
 		// 显示弹窗
 		this.box.show();
-
 		// 注册弹窗resize事件
 		this.resize();
-
 	};
 
 	/**
@@ -206,6 +193,14 @@
 		// Create the Mask
 		this.mask = $('<div class="wdialog-bg" />').appendTo('body');
 		return this;
+	};
+
+	// This is the wait function
+	Modal.prototype.setWait = function () {
+		console.log("111")
+		var deferred = $.Deferred();
+		this.wait = $('<div class="wdialog-wait" />').appendTo(this.mask);
+		setTimeout(deferred.resolve, 500);
 	};
 
 	/**
